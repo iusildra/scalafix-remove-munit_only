@@ -1,0 +1,1 @@
+# scalafix-remove-munit_only
