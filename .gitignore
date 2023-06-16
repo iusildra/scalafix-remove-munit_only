@@ -9,4 +9,6 @@ hs_err_pid*
 .bloop
 .idea
 .vscode
-.target
+target/
+
+*.worksheet.sc

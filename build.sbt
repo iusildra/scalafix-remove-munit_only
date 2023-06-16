@@ -5,17 +5,16 @@ lazy val scala3Version = "3.3.0"
 
 inThisBuild(
   List(
-    organization := "com.example",
-    homepage := Some(url("https://github.com/com/example")),
+    // organization := "",
     licenses := List(
       "Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")
     ),
     developers := List(
       Developer(
-        "example-username",
-        "Example Full Name",
-        "example@email.com",
-        url("https://example.com")
+        "iusildra",
+        "Lucas Nouguier",
+        "lucas.nouguier@protonmail.com",
+        url("https://github.com/iusildra")
       )
     ),
     semanticdbEnabled := true,
@@ -23,7 +22,7 @@ inThisBuild(
   )
 )
 
-lazy val `scalafix-my-rules` = (project in file("."))
+lazy val `remove-munit_only` = (project in file("."))
   .aggregate(
     rules.projectRefs ++
       input.projectRefs ++
@@ -37,21 +36,25 @@ lazy val `scalafix-my-rules` = (project in file("."))
 lazy val rules = projectMatrix
   .settings(
     moduleName := "scalafix",
-    libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % V.scalafixVersion
+    libraryDependencies ++= Seq(
+      "ch.epfl.scala" %% "scalafix-core" % V.scalafixVersion,
+      )
   )
   .defaultAxes(VirtualAxis.jvm)
   .jvmPlatform(rulesCrossVersions)
 
 lazy val input = projectMatrix
   .settings(
-    publish / skip := true
+    publish / skip := true,
+    libraryDependencies += Dependencies.munit
   )
   .defaultAxes(VirtualAxis.jvm)
   .jvmPlatform(scalaVersions = rulesCrossVersions :+ scala3Version)
 
 lazy val output = projectMatrix
   .settings(
-    publish / skip := true
+    publish / skip := true,
+    libraryDependencies += Dependencies.munit
   )
   .defaultAxes(VirtualAxis.jvm)
   .jvmPlatform(scalaVersions = rulesCrossVersions :+ scala3Version)

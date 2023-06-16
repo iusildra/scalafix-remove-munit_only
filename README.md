@@ -1,1 +1,7 @@
-# scalafix-remove-munit_only
+# Scalafix rule for removing .only in munit test
+
+To run tests:
+
+```zsh
+sbt tests/test
+```
