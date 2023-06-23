@@ -9,15 +9,18 @@ import scala.collection.mutable
 class RemoveMUnitOnly extends SemanticRule("RemoveMUnitOnly") {
 
   override def fix(implicit doc: SemanticDocument): Patch = {
-    val selectToReplace = mutable.Set[Term.Select]()
+    val changes = mutable.Set[Patch]()
 
     @tailrec
-    def lookForOnly(exp: Term): Option[Term.Select] = {
+    def lookForOnly(exp: Term): Patch = {
       exp match {
-        case term @ Term.Select(_, Term.Name("only")) => Some(term)
+        case term @ Term.Select(qual, Term.Name("only")) =>
+          if (term.symbol.toString == "munit/TestOptions#only().")
+            Patch.replaceTree(term, qual.toString).atomic
+          else Patch.empty
         case Term.Select(qual, _) => lookForOnly(qual)
         case Term.Apply(Term.Select(qual, _), _) => lookForOnly(qual)
-        case _ => None
+        case _ => Patch.empty
       }
     }
 
@@ -32,13 +35,15 @@ class RemoveMUnitOnly extends SemanticRule("RemoveMUnitOnly") {
             Term.Apply(Term.Name("test"), List(arg)),
             List(Term.Block(_))
           ) =>
-        lookForOnly(arg).foreach(selectToReplace.add)
+        changes.add(lookForOnly(arg))
       case Term.Apply.After_4_6_0(
-        Term.Apply.After_4_6_0(Term.Name("test"), Term.ArgClause(List(arg), _)),
-        Term.ArgClause(_, _)
-      ) =>
-        lookForOnly(arg).foreach(selectToReplace.add)
-      case apply: Term.Apply => println(s"\u001b[31m apply ${apply.structure}" + "\u001b[0m")
+            Term.Apply
+              .After_4_6_0(Term.Name("test"), Term.ArgClause(List(arg), _)),
+            Term.ArgClause(_, _)
+          ) =>
+        changes.add(lookForOnly(arg))
+      case apply: Term.Apply =>
+        println(s"\u001b[31m apply ${apply.structure}" + "\u001b[0m")
       case _ => ()
     }
 
@@ -46,9 +51,7 @@ class RemoveMUnitOnly extends SemanticRule("RemoveMUnitOnly") {
 
     traverse(doc.tree)
 
-    selectToReplace.map { tree =>
-      Patch.replaceTree(tree, tree.qual.toString).atomic
-    }.asPatch
+    changes.asPatch
   }
 
 }
