@@ -22,7 +22,7 @@ inThisBuild(
   )
 )
 
-lazy val `remove-munit_only` = (project in file("."))
+lazy val `remove-tokens` = (project in file("."))
   .aggregate(
     rules.projectRefs ++
       input.projectRefs ++

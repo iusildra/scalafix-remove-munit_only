@@ -6,10 +6,11 @@ import scala.annotation.tailrec
 
 import scala.collection.mutable
 
-class RemoveMUnitOnly extends SemanticRule("RemoveMUnitOnly") {
+class RemoveTokens(config: RemoveTokensConfiguration) extends SemanticRule("RemoveTokens") {
 
   override def fix(implicit doc: SemanticDocument): Patch = {
     val changes = mutable.Set[Patch]()
+
 
     @tailrec
     def lookForOnly(exp: Term): Patch = {
